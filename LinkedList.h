@@ -14,7 +14,7 @@ typedef struct llst_listStruct {
     llst_node* head;
     llst_node* tail;
 
-    int length;
+    long int length;
 } llst_list;
 
 
@@ -42,9 +42,9 @@ void _llst_pushNodeToNode(llst_node* before, llst_node* head){
 }
 
 //Insert a node iterating forward
-void _llst_insertAtDepthFwd(llst_node* toInsert, llst_node* head, int position){
+void _llst_insertAtDepthFwd(llst_node* toInsert, llst_node* head, long int position){
     llst_node* working = head;
-    for (int index = 0; index < position; index++){
+    for (long int index = 0; index < position; index++){
         if (working == NULL){
             return;
         }
@@ -63,9 +63,9 @@ void _llst_insertAtDepthFwd(llst_node* toInsert, llst_node* head, int position){
 }
 
 //Insert a node iterating backward
-void _llst_insertAtDepthRev(llst_node* toInsert, llst_node* tail, int position){
+void _llst_insertAtDepthRev(llst_node* toInsert, llst_node* tail, long int position){
     llst_node* working = tail;
-    for (int index = -1; index >= position; index--){
+    for (long int index = -1; index >= position; index--){
         if (working == NULL){
             return;
         }
@@ -83,9 +83,9 @@ void _llst_insertAtDepthRev(llst_node* toInsert, llst_node* tail, int position){
 }
 
 //Get a node iterating forward
-llst_node* _llst_getFwd(llst_node* head, int position){
+llst_node* _llst_getFwd(llst_node* head, long int position){
     llst_node* working = head;
-    for (int index = 0; index < position; index++){
+    for (long int index = 0; index < position; index++){
         if (working == NULL){
             return NULL;
         }
@@ -96,9 +96,9 @@ llst_node* _llst_getFwd(llst_node* head, int position){
 }
 
 //Get a node iterating backward
-llst_node* _llst_getRev(llst_node* tail, int position){
+llst_node* _llst_getRev(llst_node* tail, long int position){
     llst_node* working = tail;
-    for (int index = -1; index >= position+1; index--){
+    for (long int index = -1; index >= position+1; index--){
         working = working->before;
     };
 
@@ -106,14 +106,14 @@ llst_node* _llst_getRev(llst_node* tail, int position){
 }
 
 //Get a value iterating forward
-void* _llst_getValueFwd(llst_node* head, int position){
+void* _llst_getValueFwd(llst_node* head, long int position){
     return _llst_getFwd(head,position)->data;
 }
 
 
 
 //Get a value iterating backward
-void* _llst_getValueRev(llst_node* tail, int position){
+void* _llst_getValueRev(llst_node* tail, long int position){
     return _llst_getRev(tail,position)->data;
 }
 
@@ -162,14 +162,14 @@ void llst_push(void* data, llst_list* myList){
 }
 
 //absolute value integer
-int _llst_abs(int input){
+long int _llst_abs(long int input){
     return (input < 0) ? input*-1: input;
 }
 
 //determine closest circular index
-int _llst_getClosestIndex(int index, int length){
+long int _llst_getClosestIndex(long int index, long int length){
     //Determine the closest point
-    int realIndex = index;
+    long int realIndex = index;
     
     //If Reverse Index
     if (index < 0){
@@ -188,12 +188,12 @@ int _llst_getClosestIndex(int index, int length){
 }
 
 //Get value at position
-void* llst_get(int index, llst_list* myList){
+void* llst_get(long int index, llst_list* myList){
     if (myList->length == 0){
         return NULL;
     }
 
-    int closestIndex = _llst_getClosestIndex(index,myList->length);
+    long int closestIndex = _llst_getClosestIndex(index,myList->length);
 
     if (closestIndex < 0){
         return _llst_getValueRev(myList->tail, closestIndex);
@@ -203,12 +203,12 @@ void* llst_get(int index, llst_list* myList){
     }
 }
 
-int llst_length(llst_list* myList){
+long int llst_length(llst_list* myList){
     return myList->length;
 }
 
 //Insert into the linked list - will place data at the exact place mentioned
-void llst_insertAt(int index, void* data, llst_list* myList){
+void llst_insertAt(long int index, void* data, llst_list* myList){
     if (myList->length == 0){
         llst_node* firstNode = _llst_newNode(data,NULL,NULL);
         myList->head = firstNode;
@@ -300,12 +300,12 @@ void* llst_dequeue(llst_list* myList){
 
 
 //Delete from the linked list - will delete the exact element listed
-void llst_delete(int index, llst_list* myList){
+void llst_delete(long int index, llst_list* myList){
     if (myList->length == 0){
         return;
     }
     else {
-        int closestIndex = _llst_getClosestIndex(index,myList->length);
+        long int closestIndex = _llst_getClosestIndex(index,myList->length);
 
         llst_node* toDelete = NULL;
         if (closestIndex == -1){
@@ -340,8 +340,8 @@ void llst_delete(int index, llst_list* myList){
 
 //Clear a list
 void llst_clear(llst_list* myList){
-    int oldLength = myList->length;
-    for (int index = 0; index < oldLength; index++){
+    long int oldLength = myList->length;
+    for (long int index = 0; index < oldLength; index++){
         llst_pop(myList);
     }
 }
@@ -389,12 +389,12 @@ void* llst_dequeueSafe(llst_list* myList){
 
 
 //Delete from the linked list - will delete the exact element listed
-void llst_deleteSafe(int index, llst_list* myList){
+void llst_deleteSafe(long int index, llst_list* myList){
     if (myList->length == 0){
         return;
     }
     else {
-        int closestIndex = _llst_getClosestIndex(index,myList->length);
+        long int closestIndex = _llst_getClosestIndex(index,myList->length);
 
         llst_node* toDelete = NULL;
         if (closestIndex == -1){
@@ -430,8 +430,8 @@ void llst_deleteSafe(int index, llst_list* myList){
 
 //Clear a list
 void llst_clearSafe(llst_list* myList){
-    int oldLength = myList->length;
-    for (int index = 0; index < oldLength; index++){
+    long int oldLength = myList->length;
+    for (long int index = 0; index < oldLength; index++){
         llst_popSafe(myList);
     }
 }

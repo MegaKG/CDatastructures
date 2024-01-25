@@ -3,13 +3,6 @@
 #include "LinkedList.h"
 #include <string.h>
 
-void dumpListStr(llst_list* myList){
-    llst_node* start = myList->head;
-    for (int i = 0; i < myList; i++){
-        printf("Value: %s at index %i\n",start->data,i);
-        start = start->after;
-    }
-}
 
 int main(int argc, char** argv){
     //Test the Linked LinkedList

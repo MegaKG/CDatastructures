@@ -1,4 +1,5 @@
 #include "LinkedList.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,12 +11,13 @@ typedef struct htbl_keyPairStruct {
 
 typedef struct htbl_tableStruct {
     llst_list** hashTable;
-    int tableWidth;
-    int keyCount;
+    long int tableWidth;
+    long int keyCount;
 } htbl_table;
 
+
 //This is the FNV-0 Basic Hash system
-int htbl_hashString(char* key, int maxWidth){
+long int htbl_hashString(char* key, int maxWidth){
     //A magic number!
     const unsigned long long int FNV_prime = 1099511628211L;
     unsigned long long int Output = 0;
@@ -49,22 +51,22 @@ int compareString(char* A, char* B){
     return 1;
 }
 
-int htbl_length(htbl_table* myTable){
+long int htbl_length(htbl_table* myTable){
     return myTable->keyCount;
 }
 
-htbl_table* htbl_newTable(int tableWidth){
+htbl_table* htbl_newTable(long int tableWidth){
     //Create the table in memory
     htbl_table* myNewTable = (htbl_table*)malloc(sizeof(htbl_table));
     myNewTable->tableWidth = tableWidth;
 
     //Create the array of "buckets"
-    myNewTable->hashTable = (llst_list**)malloc(sizeof(llst_list*));
+    myNewTable->hashTable = (llst_list**)malloc(sizeof(llst_list*)*tableWidth);
 
     //Create the sublists for the collisions
-    for (int index = 0; index < tableWidth; index++){
+    for (long int index = 0; index < tableWidth; index++){
         myNewTable->hashTable[index] = llst_newList();
-        printf("New List %p\n",myNewTable->hashTable[index]);
+        //printf("New List %p\n",myNewTable->hashTable[index]);
     }
 
     //Return the new table
@@ -74,6 +76,11 @@ htbl_table* htbl_newTable(int tableWidth){
 
 
 htbl_keyPair* _htbl_searchListForKeypair(char* key, llst_list* targetList){
+    //If the list is empty, return null
+    if (llst_length(targetList) == 0){
+        return NULL;
+    }
+
     //Abuse the internal workings of the linked list to search
     llst_node* working = targetList->head;
     if (working == NULL){
@@ -112,10 +119,12 @@ char* _htbl_copyString(char* input){
 
 void* htbl_getValue(char* key, htbl_table* myTable){
     //Hash the String
-    int hashTableKey = htbl_hashString(key,myTable->tableWidth);
+    long int hashTableKey = htbl_hashString(key,myTable->tableWidth);
+    //printf("Key: %li\n",hashTableKey);
 
     //Get the target list
     llst_list* targetList = myTable->hashTable[hashTableKey];
+    //printf("Got List %p length %i\n",targetList,llst_length(targetList));
 
     //Perform a lookup
     htbl_keyPair* result = _htbl_searchListForKeypair(key,targetList);
@@ -130,7 +139,7 @@ void* htbl_getValue(char* key, htbl_table* myTable){
 
 void htbl_setValue(char* key, void* data, htbl_table* myTable){
     //Hash the String
-    int hashTableKey = htbl_hashString(key,myTable->tableWidth);
+    long int hashTableKey = htbl_hashString(key,myTable->tableWidth);
 
     //Get the target list
     llst_list* targetList = myTable->hashTable[hashTableKey];
@@ -148,7 +157,7 @@ void htbl_setValue(char* key, void* data, htbl_table* myTable){
 
 void htbl_deleteValue(char* key, htbl_table* myTable){
     //Hash the String
-    int hashTableKey = htbl_hashString(key,myTable->tableWidth);
+    long int hashTableKey = htbl_hashString(key,myTable->tableWidth);
 
     //Get the target list
     llst_list* targetList = myTable->hashTable[hashTableKey];
@@ -161,7 +170,7 @@ void htbl_deleteValue(char* key, htbl_table* myTable){
 
     //Iterate over the linked list;
     htbl_keyPair* keyPair;
-    int index = 0;
+    long int index = 0;
     while (1){
         //Fetch the Keypair
         keyPair = (htbl_keyPair*)working->data;
@@ -182,6 +191,7 @@ void htbl_deleteValue(char* key, htbl_table* myTable){
         //Otherwise iterate to next value
         else {
             working = working->after;
+            index += 1;
         }
     }
 }
@@ -197,7 +207,7 @@ void htbl_insertValue(char* key, void* value, htbl_table* myTable){
     newKeypair->dataValue = value;
 
     //Hash the String
-    int hashTableKey = htbl_hashString(myKey,myTable->tableWidth);
+    long int hashTableKey = htbl_hashString(myKey,myTable->tableWidth);
 
     //Get the target list
     llst_list* targetList = myTable->hashTable[hashTableKey];
@@ -214,8 +224,8 @@ void htbl_insertValue(char* key, void* value, htbl_table* myTable){
 //Empty the dictionary
 void htbl_clear(htbl_table* myTable){
     htbl_keyPair* workingPair;
-    for (int tableIndex = 0; tableIndex < myTable->tableWidth; tableIndex++){
-        for (int listIndex = 0; listIndex < myTable->hashTable[tableIndex]->length; listIndex++){
+    for (long int tableIndex = 0; tableIndex < myTable->tableWidth; tableIndex++){
+        for (long int listIndex = 0; listIndex < myTable->hashTable[tableIndex]->length; listIndex++){
             workingPair = (htbl_keyPair*)llst_pop(myTable->hashTable[tableIndex]);
             if (workingPair != NULL){
                 free(workingPair->keyValue);
@@ -229,8 +239,8 @@ void htbl_clear(htbl_table* myTable){
 void htbl_destroy(htbl_table* myTable){
     htbl_clear(myTable);
 
-    int oldLength =  myTable->tableWidth;
-    for (int tableIndex = 0; tableIndex < oldLength; tableIndex++){
+    long int oldLength =  myTable->tableWidth;
+    for (long int tableIndex = 0; tableIndex < oldLength; tableIndex++){
         llst_destroy(myTable->hashTable[tableIndex]);
     }
     free(myTable->hashTable);
@@ -242,7 +252,7 @@ void htbl_destroy(htbl_table* myTable){
 //These call "free" on each data pointer
 void htbl_setValueSafe(char* key, void* data, htbl_table* myTable){
     //Hash the String
-    int hashTableKey = htbl_hashString(key,myTable->tableWidth);
+    long int hashTableKey = htbl_hashString(key,myTable->tableWidth);
 
     //Get the target list
     llst_list* targetList = myTable->hashTable[hashTableKey];
@@ -261,7 +271,7 @@ void htbl_setValueSafe(char* key, void* data, htbl_table* myTable){
 
 void htbl_deleteValueSafe(char* key, htbl_table* myTable){
     //Hash the String
-    int hashTableKey = htbl_hashString(key,myTable->tableWidth);
+    long int hashTableKey = htbl_hashString(key,myTable->tableWidth);
 
     //Get the target list
     llst_list* targetList = myTable->hashTable[hashTableKey];
@@ -274,14 +284,14 @@ void htbl_deleteValueSafe(char* key, htbl_table* myTable){
 
     //Iterate over the linked list;
     htbl_keyPair* keyPair;
-    int index = 0;
+    long int index = 0;
     while (1){
         //Fetch the Keypair
         keyPair = (htbl_keyPair*)working->data;
 
         //If it is a match to the key, return the data
         if (compareString(keyPair->keyValue,key)){
-            free(keyPair->keyValue);
+            //free(keyPair->keyValue);
             free(keyPair->dataValue);
             free(keyPair);
             llst_delete(index,targetList);
@@ -296,6 +306,7 @@ void htbl_deleteValueSafe(char* key, htbl_table* myTable){
         //Otherwise iterate to next value
         else {
             working = working->after;
+            index += 1;
         }
     }
 }
@@ -303,8 +314,8 @@ void htbl_deleteValueSafe(char* key, htbl_table* myTable){
 //Empty the dictionary
 void htbl_clearSafe(htbl_table* myTable){
     htbl_keyPair* workingPair;
-    for (int tableIndex = 0; tableIndex < myTable->tableWidth; tableIndex++){
-        for (int listIndex = 0; listIndex < myTable->hashTable[tableIndex]->length; listIndex++){
+    for (long int tableIndex = 0; tableIndex < myTable->tableWidth; tableIndex++){
+        for (long int listIndex = 0; listIndex < myTable->hashTable[tableIndex]->length; listIndex++){
             workingPair = (htbl_keyPair*)llst_pop(myTable->hashTable[tableIndex]);
             if (workingPair != NULL){
                 free(workingPair->keyValue);
@@ -319,7 +330,7 @@ void htbl_clearSafe(htbl_table* myTable){
 void htbl_destroySafe(htbl_table* myTable){
     htbl_clearSafe(myTable);
 
-    for (int tableIndex = 0; tableIndex < myTable->tableWidth; tableIndex++){
+    for (long int tableIndex = 0; tableIndex < myTable->tableWidth; tableIndex++){
         llst_destroy(myTable->hashTable[tableIndex]);
     }
     free(myTable->hashTable);
